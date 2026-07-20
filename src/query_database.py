@@ -30,6 +30,26 @@ def get_matches():
         return cursor.fetchall()
 
 
+def get_team_by_name(team_name):
+    with sqlite3.connect(DATABASE_PATH) as connection:
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            SELECT
+                team_name,
+                city,
+                stadium,
+                year_founded
+            FROM teams
+            WHERE team_name = ?;
+            """,
+            (team_name,),
+        )
+
+        return cursor.fetchone()
+
+
 def display_matches(matches):
     for (
         season_name,
@@ -45,6 +65,20 @@ def display_matches(matches):
         )
 
 
+def display_team(team):
+    if team is None:
+        print("Team not found.")
+        return
+
+    team_name, city, stadium, year_founded = team
+
+    print(f"Team: {team_name}")
+    print(f"City: {city}")
+    print(f"Stadium: {stadium}")
+    print(f"Founded: {year_founded}")
+
+
 if __name__ == "__main__":
-    matches = get_matches()
-    display_matches(matches)
+    team_name = input("Enter a team name: ")
+    team = get_team_by_name(team_name)
+    display_team(team)
