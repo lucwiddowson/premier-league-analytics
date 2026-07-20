@@ -95,3 +95,54 @@ JOIN teams AS home
     ON matches.home_team_id = home.team_id
 JOIN teams AS away
     ON matches.away_team_id = away.team_id;
+
+SELECT
+    matches.match_date,
+    home.team_name AS home_team,
+    away.team_name AS away_team,
+    matches.home_goals || '-' || matches.away_goals AS score,
+    CASE
+        WHEN matches.home_goals > matches.away_goals THEN 'Home win'
+        WHEN matches.home_goals < matches.away_goals THEN 'Away win'
+        ELSE 'Draw'
+    END AS result
+FROM matches
+JOIN teams AS home
+    ON matches.home_team_id = home.team_id
+JOIN teams AS away
+    ON matches.away_team_id = away.team_id;
+
+SELECT
+    matches.match_date,
+    home.team_name AS home_team,
+    away.team_name AS away_team
+FROM matches
+JOIN teams as home
+    ON matches.home_team_id = home.team_id
+JOIN teams as away
+    ON matches.away_team_id = away.team_id
+WHERE matches.home_goals = matches.away_goals;
+
+SELECT
+    home.team_name AS team,
+    COUNT(*) AS home_matches,
+    SUM(
+        CASE
+            WHEN matches.home_goals > matches.away_goals THEN 1
+            ELSE 0
+        END
+    ) AS home_wins
+FROM matches
+JOIN teams AS home
+    ON matches.home_team_id = home.team_id
+GROUP BY home.team_name
+ORDER BY home_wins DESC;
+
+SELECT
+    home.team_name AS team,
+    SUM(matches.home_goals) AS total_home_goals
+FROM matches
+JOIN teams AS home
+    ON matches.home_team_id = home.team_id
+GROUP BY home.team_name
+ORDER BY total_home_goals DESC;
