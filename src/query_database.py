@@ -5,11 +5,12 @@ from pathlib import Path
 DATABASE_PATH = Path("database/premier_league.db")
 
 
-def get_matches():
+def get_matches(season_id):
     with sqlite3.connect(DATABASE_PATH) as connection:
         cursor = connection.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 seasons.season_name,
                 matches.match_date,
@@ -24,8 +25,11 @@ def get_matches():
                 ON matches.home_team_id = home.team_id
             JOIN teams AS away
                 ON matches.away_team_id = away.team_id
+            WHERE matches.season_id = ?
             ORDER BY matches.match_date;
-        """)
+            """,
+            (season_id,),
+        )
 
         return cursor.fetchall()
 
@@ -54,13 +58,15 @@ def get_seasons():
     with sqlite3.connect(DATABASE_PATH) as connection:
         cursor = connection.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 season_id,
                 season_name
             FROM seasons
             ORDER BY season_name DESC;
-        """)
+            """
+        )
 
         return cursor.fetchall()
 
@@ -223,10 +229,27 @@ def display_league_table(table):
         )
 
 
+def choose_season():
+    seasons = get_seasons()
+
+    if not seasons:
+        print("No seasons found.")
+        return None
+
+    display_seasons(seasons)
+    season_id = input("Choose a season ID: ")
+
+    if not season_id.isdigit():
+        print("Invalid season ID.")
+        return None
+
+    return int(season_id)
+
+
 def run_menu():
     while True:
         print("\nPremier League Analytics")
-        print("1. View all matches")
+        print("1. View matches by season")
         print("2. Look up a team")
         print("3. View league table")
         print("4. Exit")
@@ -234,7 +257,17 @@ def run_menu():
         choice = input("Choose an option: ")
 
         if choice == "1":
-            matches = get_matches()
+            season_id = choose_season()
+
+            if season_id is None:
+                continue
+
+            matches = get_matches(season_id)
+
+            if not matches:
+                print("No matches found for that season.")
+                continue
+
             display_matches(matches)
 
         elif choice == "2":
@@ -243,20 +276,12 @@ def run_menu():
             display_team(team)
 
         elif choice == "3":
-            seasons = get_seasons()
+            season_id = choose_season()
 
-            if not seasons:
-                print("No seasons found.")
+            if season_id is None:
                 continue
 
-            display_seasons(seasons)
-            season_id = input("Choose a season ID: ")
-
-            if not season_id.isdigit():
-                print("Invalid season ID.")
-                continue
-
-            table = get_league_table(int(season_id))
+            table = get_league_table(season_id)
             display_league_table(table)
 
         elif choice == "4":
