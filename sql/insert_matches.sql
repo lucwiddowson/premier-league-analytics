@@ -1,5 +1,6 @@
 INSERT INTO matches (
     match_id,
+    season_id,
     match_date,
     home_team_id,
     away_team_id,
@@ -7,6 +8,7 @@ INSERT INTO matches (
     away_goals
 )
 VALUES (
+    1,
     1,
     '2025-08-16',
     1,
@@ -17,6 +19,7 @@ VALUES (
 
 INSERT INTO matches (
     match_id,
+    season_id,
     match_date,
     home_team_id,
     away_team_id,
@@ -25,6 +28,7 @@ INSERT INTO matches (
 )
 VALUES (
     2,
+    1,
     '2025-08-17',
     4,
     3,

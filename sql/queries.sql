@@ -146,3 +146,17 @@ JOIN teams AS home
     ON matches.home_team_id = home.team_id
 GROUP BY home.team_name
 ORDER BY total_home_goals DESC;
+
+SELECT
+    seasons.season_name,
+    matches.match_date,
+    home.team_name AS home_team,
+    away.team_name AS away_team,
+    matches.home_goals || '-' || matches.away_goals AS score
+FROM matches
+JOIN seasons
+    ON matches.season_id = seasons.season_id
+JOIN teams AS home
+    ON matches.home_team_id = home.team_id
+JOIN teams AS away
+    ON matches.away_team_id = away.team_id;
