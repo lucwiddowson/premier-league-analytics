@@ -50,8 +50,6 @@ git clone https://github.com/lucwiddowson/premier-league-analytics.git
 cd premier-league-analytics
 ```
 
-Replace `YOUR-USERNAME` with the relevant GitHub username.
-
 ### 2. Create a virtual environment
 
 ```powershell
