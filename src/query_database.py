@@ -54,6 +54,89 @@ def get_team_by_name(team_name):
         return cursor.fetchone()
 
 
+def get_team_season_stats(team_name, season_id):
+    with sqlite3.connect(DATABASE_PATH) as connection:
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            WITH team_results AS (
+                SELECT
+                    matches.home_team_id AS team_id,
+                    1 AS played,
+                    CASE
+                        WHEN matches.home_goals > matches.away_goals THEN 1
+                        ELSE 0
+                    END AS won,
+                    CASE
+                        WHEN matches.home_goals = matches.away_goals THEN 1
+                        ELSE 0
+                    END AS drawn,
+                    CASE
+                        WHEN matches.home_goals < matches.away_goals THEN 1
+                        ELSE 0
+                    END AS lost,
+                    matches.home_goals AS goals_for,
+                    matches.away_goals AS goals_against,
+                    CASE
+                        WHEN matches.home_goals > matches.away_goals THEN 3
+                        WHEN matches.home_goals = matches.away_goals THEN 1
+                        ELSE 0
+                    END AS points
+                FROM matches
+                WHERE matches.season_id = ?
+
+                UNION ALL
+
+                SELECT
+                    matches.away_team_id AS team_id,
+                    1 AS played,
+                    CASE
+                        WHEN matches.away_goals > matches.home_goals THEN 1
+                        ELSE 0
+                    END AS won,
+                    CASE
+                        WHEN matches.away_goals = matches.home_goals THEN 1
+                        ELSE 0
+                    END AS drawn,
+                    CASE
+                        WHEN matches.away_goals < matches.home_goals THEN 1
+                        ELSE 0
+                    END AS lost,
+                    matches.away_goals AS goals_for,
+                    matches.home_goals AS goals_against,
+                    CASE
+                        WHEN matches.away_goals > matches.home_goals THEN 3
+                        WHEN matches.away_goals = matches.home_goals THEN 1
+                        ELSE 0
+                    END AS points
+                FROM matches
+                WHERE matches.season_id = ?
+            )
+
+            SELECT
+                teams.team_name,
+                COALESCE(SUM(team_results.played), 0) AS played,
+                COALESCE(SUM(team_results.won), 0) AS won,
+                COALESCE(SUM(team_results.drawn), 0) AS drawn,
+                COALESCE(SUM(team_results.lost), 0) AS lost,
+                COALESCE(SUM(team_results.goals_for), 0) AS goals_for,
+                COALESCE(SUM(team_results.goals_against), 0) AS goals_against,
+                COALESCE(SUM(team_results.points), 0) AS points
+            FROM teams
+            LEFT JOIN team_results
+                ON teams.team_id = team_results.team_id
+            WHERE LOWER(teams.team_name) = LOWER(?)
+            GROUP BY
+                teams.team_id,
+                teams.team_name;
+            """,
+            (season_id, season_id, team_name),
+        )
+
+        return cursor.fetchone()
+
+
 def get_seasons():
     with sqlite3.connect(DATABASE_PATH) as connection:
         cursor = connection.cursor()
@@ -180,10 +263,39 @@ def display_team(team):
 
     team_name, city, stadium, year_founded = team
 
-    print(f"Team: {team_name}")
+    print(f"\nTeam: {team_name}")
     print(f"City: {city}")
     print(f"Stadium: {stadium}")
     print(f"Founded: {year_founded}")
+
+
+def display_team_season_stats(stats):
+    if stats is None:
+        print("Team not found.")
+        return
+
+    (
+        team_name,
+        played,
+        won,
+        drawn,
+        lost,
+        goals_for,
+        goals_against,
+        points,
+    ) = stats
+
+    goal_difference = goals_for - goals_against
+
+    print(f"\nTeam: {team_name}")
+    print(f"Played: {played}")
+    print(f"Wins: {won}")
+    print(f"Draws: {drawn}")
+    print(f"Losses: {lost}")
+    print(f"Goals for: {goals_for}")
+    print(f"Goals against: {goals_against}")
+    print(f"Goal difference: {goal_difference}")
+    print(f"Points: {points}")
 
 
 def display_seasons(seasons):
@@ -252,7 +364,8 @@ def run_menu():
         print("1. View matches by season")
         print("2. Look up a team")
         print("3. View league table")
-        print("4. Exit")
+        print("4. View team season statistics")
+        print("5. Exit")
 
         choice = input("Choose an option: ")
 
@@ -285,11 +398,21 @@ def run_menu():
             display_league_table(table)
 
         elif choice == "4":
+            season_id = choose_season()
+
+            if season_id is None:
+                continue
+
+            team_name = input("Enter a team name: ")
+            stats = get_team_season_stats(team_name, season_id)
+            display_team_season_stats(stats)
+
+        elif choice == "5":
             print("Goodbye.")
             break
 
         else:
-            print("Invalid option. Please choose 1, 2, 3, or 4.")
+            print("Invalid option. Please choose 1, 2, 3, 4, or 5.")
 
 
 if __name__ == "__main__":
