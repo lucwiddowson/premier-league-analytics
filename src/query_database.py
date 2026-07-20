@@ -50,11 +50,27 @@ def get_team_by_name(team_name):
         return cursor.fetchone()
 
 
-def get_league_table():
+def get_seasons():
     with sqlite3.connect(DATABASE_PATH) as connection:
         cursor = connection.cursor()
 
         cursor.execute("""
+            SELECT
+                season_id,
+                season_name
+            FROM seasons
+            ORDER BY season_name DESC;
+        """)
+
+        return cursor.fetchall()
+
+
+def get_league_table(season_id):
+    with sqlite3.connect(DATABASE_PATH) as connection:
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
             WITH team_results AS (
                 SELECT
                     matches.home_team_id AS team_id,
@@ -79,6 +95,7 @@ def get_league_table():
                         ELSE 0
                     END AS points
                 FROM matches
+                WHERE matches.season_id = ?
 
                 UNION ALL
 
@@ -105,6 +122,7 @@ def get_league_table():
                         ELSE 0
                     END AS points
                 FROM matches
+                WHERE matches.season_id = ?
             )
 
             SELECT
@@ -127,9 +145,12 @@ def get_league_table():
                 goals_for - goals_against DESC,
                 goals_for DESC,
                 teams.team_name ASC;
-        """)
+            """,
+            (season_id, season_id),
+        )
 
         return cursor.fetchall()
+
 
 def display_matches(matches):
     for (
@@ -157,6 +178,11 @@ def display_team(team):
     print(f"City: {city}")
     print(f"Stadium: {stadium}")
     print(f"Founded: {year_founded}")
+
+
+def display_seasons(seasons):
+    for season_id, season_name in seasons:
+        print(f"{season_id}. {season_name}")
 
 
 def display_league_table(table):
@@ -217,7 +243,20 @@ def run_menu():
             display_team(team)
 
         elif choice == "3":
-            table = get_league_table()
+            seasons = get_seasons()
+
+            if not seasons:
+                print("No seasons found.")
+                continue
+
+            display_seasons(seasons)
+            season_id = input("Choose a season ID: ")
+
+            if not season_id.isdigit():
+                print("Invalid season ID.")
+                continue
+
+            table = get_league_table(int(season_id))
             display_league_table(table)
 
         elif choice == "4":
