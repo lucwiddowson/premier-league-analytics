@@ -77,8 +77,24 @@ def display_team(team):
     print(f"Stadium: {stadium}")
     print(f"Founded: {year_founded}")
 
+def run_menu():
+    print("Premier League Analytics")
+    print("1. View all matches")
+    print("2. Look up a team")
+
+    choice = input("Choose an option: ")
+
+    if choice == "1":
+        matches = get_matches()
+        display_matches(matches)
+
+    elif choice == "2":
+        team_name = input("Enter a team name: ")
+        team = get_team_by_name(team_name)
+        display_team(team)
+
+    else:
+        print("Invalid option.")
 
 if __name__ == "__main__":
-    team_name = input("Enter a team name: ")
-    team = get_team_by_name(team_name)
-    display_team(team)
+    run_menu()
