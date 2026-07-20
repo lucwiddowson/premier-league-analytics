@@ -2,7 +2,8 @@ import sqlite3
 from pathlib import Path
 
 
-DATABASE_PATH = Path("database/premier_league.db")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DATABASE_PATH = PROJECT_ROOT / "database" / "premier_league.db"
 
 
 def get_matches(season_id):
