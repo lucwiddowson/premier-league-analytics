@@ -1,6 +1,21 @@
 team_id,team_name,city,stadium,year_founded
 1,Arsenal,London,Emirates Stadium,1886
-2,Liverpool,Liverpool,Anfield,1892
-3,Chelsea,London,Stamford Bridge,1905
-4,Manchester United,Manchester,Old Trafford,1878
-5,Newcastle United,Newcastle,St James' Park,1892
+2,Aston Villa,Birmingham,Villa Park,1874
+3,Bournemouth,Bournemouth,Vitality Stadium,1899
+4,Brentford,London,Gtech Community Stadium,1889
+5,Brighton,Brighton,American Express Stadium,1901
+6,Burnley,Burnley,Turf Moor,1882
+7,Chelsea,London,Stamford Bridge,1905
+8,Crystal Palace,London,Selhurst Park,1861
+9,Everton,Liverpool,Hill Dickinson Stadium,1878
+10,Fulham,London,Craven Cottage,1879
+11,Leeds United,Leeds,Elland Road,1919
+12,Liverpool,Liverpool,Anfield,1892
+13,Manchester City,Manchester,Etihad Stadium,1880
+14,Manchester United,Manchester,Old Trafford,1878
+15,Newcastle United,Newcastle,St James' Park,1892
+16,Nottingham Forest,Nottingham,City Ground,1865
+17,Sunderland,Sunderland,Stadium of Light,1879
+18,Tottenham Hotspur,London,Tottenham Hotspur Stadium,1882
+19,West Ham United,London,London Stadium,1895
+20,Wolverhampton Wanderers,Wolverhampton,Molineux Stadium,1877
