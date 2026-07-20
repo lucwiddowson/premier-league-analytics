@@ -55,18 +55,9 @@ def get_league_table():
         cursor = connection.cursor()
 
         cursor.execute("""
-            SELECT
-                team_name,
-                SUM(played) AS played,
-                SUM(won) AS won,
-                SUM(drawn) AS drawn,
-                SUM(lost) AS lost,
-                SUM(goals_for) AS goals_for,
-                SUM(goals_against) AS goals_against,
-                SUM(points) AS points
-            FROM (
+            WITH team_results AS (
                 SELECT
-                    home.team_name AS team_name,
+                    matches.home_team_id AS team_id,
                     1 AS played,
                     CASE
                         WHEN matches.home_goals > matches.away_goals THEN 1
@@ -88,13 +79,11 @@ def get_league_table():
                         ELSE 0
                     END AS points
                 FROM matches
-                JOIN teams AS home
-                    ON matches.home_team_id = home.team_id
 
                 UNION ALL
 
                 SELECT
-                    away.team_name AS team_name,
+                    matches.away_team_id AS team_id,
                     1 AS played,
                     CASE
                         WHEN matches.away_goals > matches.home_goals THEN 1
@@ -116,18 +105,31 @@ def get_league_table():
                         ELSE 0
                     END AS points
                 FROM matches
-                JOIN teams AS away
-                    ON matches.away_team_id = away.team_id
             )
-            GROUP BY team_name
+
+            SELECT
+                teams.team_name,
+                COALESCE(SUM(team_results.played), 0) AS played,
+                COALESCE(SUM(team_results.won), 0) AS won,
+                COALESCE(SUM(team_results.drawn), 0) AS drawn,
+                COALESCE(SUM(team_results.lost), 0) AS lost,
+                COALESCE(SUM(team_results.goals_for), 0) AS goals_for,
+                COALESCE(SUM(team_results.goals_against), 0) AS goals_against,
+                COALESCE(SUM(team_results.points), 0) AS points
+            FROM teams
+            LEFT JOIN team_results
+                ON teams.team_id = team_results.team_id
+            GROUP BY
+                teams.team_id,
+                teams.team_name
             ORDER BY
                 points DESC,
                 goals_for - goals_against DESC,
-                goals_for DESC;
+                goals_for DESC,
+                teams.team_name ASC;
         """)
 
         return cursor.fetchall()
-
 
 def display_matches(matches):
     for (
