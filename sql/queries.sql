@@ -51,3 +51,47 @@ WHERE team_name LIKE '%United%';
 SELECT team_name, stadium
 FROM teams
 WHERE stadium LIKE '%Stadium%';
+
+SELECT COUNT(*) AS total_teams
+FROM teams;
+
+SELECT MIN(year_founded) AS oldest_founding_year
+FROM teams;
+
+SELECT MAX(year_founded) AS newest_founding_year
+FROM teams;
+
+SELECT AVG(year_founded) AS average_founding_year
+FROM teams;
+
+SELECT city, COUNT(*) AS number_of_teams
+FROM teams
+GROUP BY city
+ORDER BY number_of_teams DESC;
+
+SELECT COUNT(*) AS historic_teams
+FROM teams
+WHERE year_founded < 1900;
+
+SELECT
+    matches.match_date,
+    home.team_name AS home_team,
+    away.team_name AS away_team,
+    matches.home_goals,
+    matches.away_goals
+FROM matches
+JOIN teams AS home
+    ON matches.home_team_id = home.team_id
+JOIN teams AS away
+    ON matches.away_team_id = away.team_id;
+
+SELECT
+    matches.match_date,
+    home.team_name AS home_team,
+    away.team_name AS away_team,
+    matches.home_goals || '-' || matches.away_goals AS score
+FROM matches
+JOIN teams AS home
+    ON matches.home_team_id = home.team_id
+JOIN teams AS away
+    ON matches.away_team_id = away.team_id;
