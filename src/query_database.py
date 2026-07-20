@@ -42,7 +42,7 @@ def get_team_by_name(team_name):
                 stadium,
                 year_founded
             FROM teams
-            WHERE team_name = ?;
+            WHERE LOWER(team_name) = LOWER(?);
             """,
             (team_name,),
         )
